@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:queens/app/router/app_router.dart';
+import 'package:queens/app/router/app_routes.dart';
 
-class DebugPlaygroundPage extends StatelessWidget {
+class DebugPlaygroundPage extends StatefulWidget {
   const DebugPlaygroundPage({super.key});
 
+  @override
+  State<DebugPlaygroundPage> createState() => _DebugPlaygroundPageState();
+}
+
+class _DebugPlaygroundPageState extends State<DebugPlaygroundPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,8 +30,13 @@ class DebugPlaygroundPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'This is the starting page of the app, used for testing features.',
+                'This area contains temporary test widgets and prototypes.',
                 style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => context.go(AppRoutes.home),
+                child: const Text('<- Back to Home'),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -41,26 +51,34 @@ class DebugPlaygroundPage extends StatelessWidget {
                 description:
                     'Test the Queens game board implementation (10x10)',
                 icon: Icons.grid_on,
-                onTap: () => context.push(AppRoutes.gameBoard),
+                onTap: () => context.push('/_debug/game-board'),
               ),
               const SizedBox(height: 16),
-              // Resizable Game Board Button (New)
+              // Resizable Game Board Button
               _buildFeatureButton(
                 context,
                 title: 'Game Board (Resizable)',
                 description: 'Test the game board with size controls',
                 icon: Icons.aspect_ratio,
-                onTap: () =>
-                    context.push(AppRoutes.resizableGameBoard), // New route
+                onTap: () => context.push('/_debug/resizable-game-board'),
               ),
               const SizedBox(height: 16),
-              // Counter Button (original feature)
+              // Counter Button
               _buildFeatureButton(
                 context,
                 title: 'Counter',
                 description: 'The original counter demo screen',
                 icon: Icons.add_circle_outline,
-                onTap: () => context.push(AppRoutes.counter),
+                onTap: () => context.push('/_debug/counter'),
+              ),
+              const SizedBox(height: 16),
+              // Main Page Prototype Button
+              _buildFeatureButton(
+                context,
+                title: 'Main Page Prototype',
+                description: 'Prototype of the main page UI design',
+                icon: Icons.dashboard,
+                onTap: () => context.push('/_debug/main-page-prototype'),
               ),
             ],
           ),

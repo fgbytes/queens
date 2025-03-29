@@ -197,6 +197,35 @@ class GameBoard {
     return layout;
   }
 
+  /// Get a cell at specific row and column
+  Cell? getCell(int row, int col) {
+    if (row < 0 || row >= size || col < 0 || col >= size) {
+      return null;
+    }
+
+    for (final kingdom in kingdoms) {
+      for (final cell in kingdom.cells) {
+        if (cell.row == row && cell.col == col) {
+          return cell;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Reset all cells to empty state and add a random distribution of pieces
+  void resetBoard() {
+    // Clear all existing pieces
+    for (final kingdom in kingdoms) {
+      for (final cell in kingdom.cells) {
+        cell.state = CellState.empty;
+      }
+    }
+
+    // Add new random pieces
+    _setInitialPieces(kingdoms, size);
+  }
+
   /// Set initial queens and dots on the board
   static void _setInitialPieces(List<Kingdom> kingdoms, int size) {
     // Scale number of queens based on board size (approximately 12 for a 10x10 board)
@@ -237,22 +266,5 @@ class GameBoard {
         }
       }
     }
-  }
-
-  /// Get a cell at specific row and column
-  Cell? getCell(int row, int col) {
-    if (row < 0 || row >= size || col < 0 || col >= size) {
-      return null;
-    }
-
-    for (final kingdom in kingdoms) {
-      for (final cell in kingdom.cells) {
-        if (cell.row == row && cell.col == col) {
-          return cell;
-        }
-      }
-    }
-
-    return null;
   }
 }

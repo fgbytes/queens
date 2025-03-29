@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:queens/debug_playground/models/game_board_model.dart';
+import 'package:queens/game/models/game_board_model.dart';
 
 class GameCell extends StatelessWidget {
   const GameCell({
