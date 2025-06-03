@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:queens/game/models/game_board_model.dart';
 import 'package:queens/game/widgets/game_cell.dart';
 
+// Define a simple record for cell position (or use a dedicated class)
+typedef CellPosition = ({int row, int col});
+
 class GameBoardWidget extends StatefulWidget {
   const GameBoardWidget({
     super.key,
@@ -27,6 +30,11 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
   late AnimationController _animController;
   double _animationProgress = 0.0;
   bool _isAnimating = false;
+
+  CellPosition?
+      _tappedCellPosition; // Cell currently under finger (visual feedback)
+  CellPosition? _panStartPosition; // Cell where the current pan gesture started
+  final Set<CellPosition> _swipedCellsInCurrentGesture = {};
 
   // Track haptic feedback stages
   bool _hasCellsHapticFired = false;
@@ -145,16 +153,138 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.maxWidth;
+        final cellSize = size / widget.gameBoard.size;
 
-        return CustomPaint(
-          size: Size(size, size),
-          painter: GameBoardPainter(
-            gameBoard: widget.gameBoard,
-            boardSize: size,
-            animationProgress: _animationProgress,
-          ),
-          child: GestureDetector(
-            onTapDown: (details) => _handleTap(details, size),
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+
+          // Remove Tap Handlers:
+          // onTapDown: ...
+          // onTapUp: ...
+          // onTapCancel: ...
+
+          // --- Use Pan Handlers for Tap and Swipe ---
+          onPanStart: (details) {
+            final pos =
+                _getCellPositionFromOffset(details.localPosition, cellSize);
+            if (pos != null) {
+              print(
+                  '🟦 onPanStart: Starting gesture at cell (${pos.row}, ${pos.col})');
+              _panStartPosition = pos;
+              _swipedCellsInCurrentGesture.clear();
+
+              final cell = widget.gameBoard.getCell(pos.row, pos.col);
+              if (cell != null && cell.state == CellState.empty) {
+                print('🟦 onPanStart: Cell is empty, setting to dot');
+                cell.state = CellState.dot;
+                _swipedCellsInCurrentGesture.add(pos);
+              } else {
+                print(
+                    '🟦 onPanStart: Cell is not empty or null, state: ${cell?.state}');
+              }
+
+              setState(() {
+                _tappedCellPosition = pos;
+              });
+            }
+          },
+          onPanUpdate: (details) {
+            final pos =
+                _getCellPositionFromOffset(details.localPosition, cellSize);
+
+            if (pos == null) {
+              // Finger moved off board
+              if (_tappedCellPosition != null) {
+                setState(() {
+                  _tappedCellPosition = null;
+                });
+              }
+              return;
+            }
+
+            // Check if finger moved to a new cell
+            if (pos != _tappedCellPosition) {
+              bool stateChanged = false;
+              // Only place dot if cell is empty and not already swiped
+              if (!_swipedCellsInCurrentGesture.contains(pos)) {
+                final cell = widget.gameBoard.getCell(pos.row, pos.col);
+                if (cell != null && cell.state == CellState.empty) {
+                  cell.state = CellState.dot;
+                  _swipedCellsInCurrentGesture.add(pos);
+                  stateChanged = true;
+                }
+              }
+              // Update visual feedback position
+              setState(() {
+                _tappedCellPosition = pos;
+              });
+            }
+            // If pos == _tappedCellPosition, do nothing in update, wait for move
+          },
+          onPanEnd: (details) {
+            final startPos = _panStartPosition;
+            final currentPos = _tappedCellPosition;
+
+            print('\n🟨 onPanEnd: Gesture ended');
+            print('🟨 Start position: ${startPos?.row}, ${startPos?.col}');
+            print(
+                '🟨 Current position: ${currentPos?.row}, ${currentPos?.col}');
+            print(
+                '🟨 Swiped cells count: ${_swipedCellsInCurrentGesture.length}');
+            print(
+                '🟨 Swiped cells: ${_swipedCellsInCurrentGesture.map((p) => "(${p.row}, ${p.col})").join(", ")}');
+
+            // Check if this was a single-cell gesture (tap)
+            final bool isSameCell = startPos != null &&
+                currentPos != null &&
+                startPos == currentPos;
+
+            print('🟨 Is same cell: $isSameCell');
+
+            // If it's the same cell AND it was modified during onPanStart
+            // (meaning it's in _swipedCellsInCurrentGesture), we leave it as is.
+            // This keeps the dot that onPanStart placed.
+            if (isSameCell && _swipedCellsInCurrentGesture.contains(startPos)) {
+              print('🟨 Keeping dot placed by onPanStart');
+            } else if (isSameCell) {
+              // Only cycle state if it's the same cell but wasn't modified during onPanStart
+              print(
+                  '🟨 Cell was not modified during onPanStart, cycling state');
+              final cell =
+                  widget.gameBoard.getCell(startPos!.row, startPos.col);
+              if (cell != null) {
+                print('🟨 Current cell state before cycle: ${cell.state}');
+                cell.cycleState();
+                print('🟨 New cell state after cycle: ${cell.state}');
+              }
+            } else {
+              print('🟨 Not a tap - cells were different');
+            }
+
+            // Clear all gesture state
+            setState(() {
+              _tappedCellPosition = null;
+              _panStartPosition = null;
+              _swipedCellsInCurrentGesture.clear();
+            });
+          },
+          onPanCancel: () {
+            // Treat cancel like pan end - clear state
+            setState(() {
+              _tappedCellPosition = null;
+              _panStartPosition = null;
+              _swipedCellsInCurrentGesture.clear();
+            });
+          },
+
+          // --- Child Painter ---
+          child: CustomPaint(
+            painter: GameBoardPainter(
+              gameBoard: widget.gameBoard,
+              boardSize: size,
+              animationProgress: _animationProgress,
+              tappedCellPosition: _tappedCellPosition,
+            ),
             child: Container(
               width: size,
               height: size,
@@ -166,22 +296,19 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
     );
   }
 
-  void _handleTap(TapDownDetails details, double boardSize) {
-    final cellSize = boardSize / widget.gameBoard.size;
-    final col = (details.localPosition.dx / cellSize).floor();
-    final row = (details.localPosition.dy / cellSize).floor();
+  // Helper to calculate cell position from local offset
+  CellPosition? _getCellPositionFromOffset(
+      Offset localPosition, double cellSize) {
+    final col = (localPosition.dx / cellSize).floor();
+    final row = (localPosition.dy / cellSize).floor();
 
     if (row >= 0 &&
         row < widget.gameBoard.size &&
         col >= 0 &&
         col < widget.gameBoard.size) {
-      setState(() {
-        final cell = widget.gameBoard.getCell(row, col);
-        if (cell != null) {
-          cell.cycleState();
-        }
-      });
+      return (row: row, col: col);
     }
+    return null;
   }
 }
 
@@ -193,11 +320,13 @@ class GameBoardPainter extends CustomPainter {
     required this.gameBoard,
     required this.boardSize,
     this.animationProgress = 1.0,
+    this.tappedCellPosition,
   });
 
   final GameBoard gameBoard;
   final double boardSize;
   final double animationProgress;
+  final CellPosition? tappedCellPosition;
 
   // Animation thresholds (fraction of total animation)
   static const double _cellsStartThreshold = 0.0;
@@ -885,6 +1014,7 @@ class GameBoardPainter extends CustomPainter {
   bool shouldRepaint(covariant GameBoardPainter oldDelegate) {
     return oldDelegate.gameBoard != gameBoard ||
         oldDelegate.boardSize != boardSize ||
-        oldDelegate.animationProgress != animationProgress;
+        oldDelegate.animationProgress != animationProgress ||
+        oldDelegate.tappedCellPosition != tappedCellPosition;
   }
 }
