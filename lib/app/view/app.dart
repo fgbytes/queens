@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
-// import 'package:queens/counter/counter.dart'; // No longer needed here
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:queens/app/router/app_router.dart' as app_router;
 import 'package:queens/l10n/l10n.dart';
 import 'package:queens/theme/app_theme.dart';
-import 'package:queens/app/router/app_router.dart'; // Import the router
+import 'package:queens/theme/cubit/theme_cubit.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Create an instance of MaterialTheme
+    return BlocProvider(
+      create: (_) => ThemeCubit(),
+      child: const AppView(),
+    );
+  }
+}
+
+class AppView extends StatelessWidget {
+  const AppView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = context.select((ThemeCubit cubit) => cubit.state);
     final materialTheme = MaterialTheme();
 
-    // Use MaterialApp.router
     return MaterialApp.router(
-      // Router configuration
-      routerConfig: router, // Provide the router configuration
-
-      // Theme configuration (remains the same)
+      routerConfig: app_router.router,
       theme: materialTheme.light(context),
       darkTheme: materialTheme.dark(context),
-      themeMode: ThemeMode.system,
-
-      // Localization configuration (remains the same)
+      themeMode: themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-
-      // home: const CounterPage(), // Remove the home property
     );
   }
 }

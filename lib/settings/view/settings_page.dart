@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:queens/theme/cubit/theme_cubit.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -11,30 +12,46 @@ class SettingsPage extends StatelessWidget {
         title: const Text('Settings'),
       ),
       body: ListView(
-        children: [
-          ListTile(
-            title: const Text('Appearance'),
-            leading: const Icon(Icons.palette),
-            onTap: () {
-              // TODO: Implement Appearance settings
-            },
+        padding: const EdgeInsets.all(16),
+        children: const [
+          _ThemeSelector(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeSelector extends StatelessWidget {
+  const _ThemeSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeCubit = context.read<ThemeCubit>();
+    final currentTheme = context.select((ThemeCubit cubit) => cubit.state);
+
+    return ListTile(
+      title: const Text('Theme'),
+      trailing: DropdownButton<ThemeMode>(
+        value: currentTheme,
+        items: const [
+          DropdownMenuItem(
+            value: ThemeMode.system,
+            child: Text('System'),
           ),
-          ListTile(
-            title: const Text('Account'),
-            leading: const Icon(Icons.account_circle),
-            onTap: () {
-              // TODO: Implement Account settings
-            },
+          DropdownMenuItem(
+            value: ThemeMode.light,
+            child: Text('Light'),
           ),
-          const Divider(),
-          ListTile(
-            title: const Text('Developer Options'),
-            subtitle: const Text('Access debug tools and prototypes'),
-            leading: const Icon(Icons.developer_mode),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/_debugPlayground'), // Navigate to debug
+          DropdownMenuItem(
+            value: ThemeMode.dark,
+            child: Text('Dark'),
           ),
         ],
+        onChanged: (ThemeMode? themeMode) {
+          if (themeMode != null) {
+            themeCubit.setTheme(themeMode);
+          }
+        },
       ),
     );
   }

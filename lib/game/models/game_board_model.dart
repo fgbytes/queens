@@ -56,9 +56,6 @@ class GameBoard {
     required this.kingdoms,
   });
 
-  final int size;
-  final List<Kingdom> kingdoms;
-
   /// Create a game board with a more realistic layout of kingdoms
   factory GameBoard.sample(int size) {
     // Define kingdom colors with exact hex codes provided
@@ -80,10 +77,10 @@ class GameBoard {
     ];
 
     // Create a dynamic kingdom layout based on the given size
-    final List<List<int>> kingdomLayout = _generateKingdomLayout(size);
+    final kingdomLayout = _generateKingdomLayout(size);
 
     // Create a map to track which cells belong to which kingdoms
-    final Map<int, List<Cell>> kingdomCells = {};
+    final kingdomCells = <int, List<Cell>>{};
 
     // Create cells based on the kingdom layout
     for (var row = 0; row < size; row++) {
@@ -115,6 +112,9 @@ class GameBoard {
     return GameBoard(size: size, kingdoms: kingdoms);
   }
 
+  final int size;
+  final List<Kingdom> kingdoms;
+
   /// Generate a kingdom layout based on board size
   static List<List<int>> _generateKingdomLayout(int size) {
     // Create a more visually appealing and connected kingdom layout
@@ -127,61 +127,61 @@ class GameBoard {
     // For clarity, we'll use a more explicit approach
 
     // Define kingdom 0 (Blue, top-right)
-    int k0StartCol = size ~/ 2;
-    int k0EndRow = size ~/ 2;
-    for (int r = 0; r < k0EndRow; r++) {
-      for (int c = k0StartCol; c < size; c++) {
+    final k0StartCol = size ~/ 2;
+    final k0EndRow = size ~/ 2;
+    for (var r = 0; r < k0EndRow; r++) {
+      for (var c = k0StartCol; c < size; c++) {
         layout[r][c] = 0;
       }
     }
 
     // Add bottom section for kingdom 0
-    for (int r = k0EndRow; r < size * 2 ~/ 3; r++) {
-      for (int c = size * 2 ~/ 3; c < size; c++) {
+    for (var r = k0EndRow; r < size * 2 ~/ 3; r++) {
+      for (var c = size * 2 ~/ 3; c < size; c++) {
         layout[r][c] = 0;
       }
     }
 
     // Define kingdom 1 (Yellow, bottom-left)
-    int k1StartRow = size * 2 ~/ 3;
-    int k1EndCol = size ~/ 2;
-    for (int r = k1StartRow; r < size; r++) {
-      for (int c = 0; c < k1EndCol; c++) {
+    final k1StartRow = size * 2 ~/ 3;
+    final k1EndCol = size ~/ 2;
+    for (var r = k1StartRow; r < size; r++) {
+      for (var c = 0; c < k1EndCol; c++) {
         layout[r][c] = 1;
       }
     }
 
     // Define kingdom 2 (Green, top-left)
-    int k2EndRow = size ~/ 3;
-    int k2EndCol = size * 2 ~/ 3;
-    for (int r = 0; r < k2EndRow; r++) {
-      for (int c = 0; c < k2EndCol; c++) {
+    final k2EndRow = size ~/ 3;
+    final k2EndCol = size * 2 ~/ 3;
+    for (var r = 0; r < k2EndRow; r++) {
+      for (var c = 0; c < k2EndCol; c++) {
         layout[r][c] = 2;
       }
     }
 
     // Define kingdom 3 (Purple, middle-left)
-    int k3StartRow = size ~/ 3;
-    int k3EndRow = size * 2 ~/ 3;
-    int k3EndCol = size ~/ 2;
-    for (int r = k3StartRow; r < k3EndRow; r++) {
-      for (int c = 0; c < k3EndCol; c++) {
+    final k3StartRow = size ~/ 3;
+    final k3EndRow = size * 2 ~/ 3;
+    final k3EndCol = size ~/ 2;
+    for (var r = k3StartRow; r < k3EndRow; r++) {
+      for (var c = 0; c < k3EndCol; c++) {
         layout[r][c] = 3;
       }
     }
 
     // Define kingdom 4 (Pink, bottom-right)
-    int k4StartRow = k3EndRow;
-    int k4StartCol = k1EndCol;
-    for (int r = k4StartRow; r < size; r++) {
-      for (int c = k4StartCol; c < size; c++) {
+    final k4StartRow = k3EndRow;
+    final k4StartCol = k1EndCol;
+    for (var r = k4StartRow; r < size; r++) {
+      for (var c = k4StartCol; c < size; c++) {
         layout[r][c] = 4;
       }
     }
 
     // Fill any remaining cells (shouldn't be any, but just in case)
-    for (int r = 0; r < size; r++) {
-      for (int c = 0; c < size; c++) {
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
         if (layout[r][c] == 0 && (r >= k0EndRow || c < k0StartCol)) {
           // This is a cell that should be assigned to another kingdom
           // Assign it based on position
@@ -228,14 +228,15 @@ class GameBoard {
 
   /// Set initial queens and dots on the board
   static void _setInitialPieces(List<Kingdom> kingdoms, int size) {
-    // Scale number of queens based on board size (approximately 12 for a 10x10 board)
+    // Scale number of queens based on board size 
+    //(approximately 12 for a 10x10 board)
     final numQueens = (size * size * 0.12).round();
     final queensPositions = <List<int>>[];
 
     // Distribute queens somewhat evenly
-    int count = 0;
+    var count = 0;
     while (count < numQueens) {
-      final row = (count * size ~/ numQueens);
+      final row = count * size ~/ numQueens;
       final col = (count % 3) * (size ~/ 3);
 
       // Avoid duplicates

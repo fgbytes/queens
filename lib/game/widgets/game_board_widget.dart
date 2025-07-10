@@ -1,18 +1,15 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:queens/game/models/game_board_model.dart';
-import 'package:queens/game/widgets/game_cell.dart';
 
 // Define a simple record for cell position (or use a dedicated class)
 typedef CellPosition = ({int row, int col});
 
 class GameBoardWidget extends StatefulWidget {
   const GameBoardWidget({
-    super.key,
-    required this.gameBoard,
+    required this.gameBoard, super.key,
     this.animate = false,
     this.enableHaptics = true,
   });
@@ -28,7 +25,7 @@ class GameBoardWidget extends StatefulWidget {
 class _GameBoardWidgetState extends State<GameBoardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
-  double _animationProgress = 0.0;
+  double _animationProgress = 0;
   bool _isAnimating = false;
 
   CellPosition?
@@ -71,12 +68,8 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
       _hasCellsHapticFired = true;
 
       // Schedule a few quick taps for staggered feeling
-      Future.delayed(const Duration(milliseconds: 100), () {
-        HapticFeedback.lightImpact();
-      });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        HapticFeedback.lightImpact();
-      });
+      Future.delayed(const Duration(milliseconds: 100), HapticFeedback.lightImpact);
+      Future.delayed(const Duration(milliseconds: 200), HapticFeedback.lightImpact);
     }
 
     // Background appearing
@@ -134,7 +127,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
       _animationProgress = 0.0;
       _resetHapticFlags();
     });
-    _animController.forward(from: 0.0).then((_) {
+    _animController.forward(from: 0).then((_) {
       setState(() {
         _isAnimating = false;
         _animationProgress = 1.0;
@@ -204,14 +197,12 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
 
             // Check if finger moved to a new cell
             if (pos != _tappedCellPosition) {
-              bool stateChanged = false;
               // Only place dot if cell is empty and not already swiped
               if (!_swipedCellsInCurrentGesture.contains(pos)) {
                 final cell = widget.gameBoard.getCell(pos.row, pos.col);
                 if (cell != null && cell.state == CellState.empty) {
                   cell.state = CellState.dot;
                   _swipedCellsInCurrentGesture.add(pos);
-                  stateChanged = true;
                 }
               }
               // Update visual feedback position
@@ -235,7 +226,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
                 '🟨 Swiped cells: ${_swipedCellsInCurrentGesture.map((p) => "(${p.row}, ${p.col})").join(", ")}');
 
             // Check if this was a single-cell gesture (tap)
-            final bool isSameCell = startPos != null &&
+            final isSameCell = startPos != null &&
                 currentPos != null &&
                 startPos == currentPos;
 
@@ -251,7 +242,7 @@ class _GameBoardWidgetState extends State<GameBoardWidget>
               print(
                   '🟨 Cell was not modified during onPanStart, cycling state');
               final cell =
-                  widget.gameBoard.getCell(startPos!.row, startPos.col);
+                  widget.gameBoard.getCell(startPos.row, startPos.col);
               if (cell != null) {
                 print('🟨 Current cell state before cycle: ${cell.state}');
                 cell.cycleState();
@@ -329,7 +320,7 @@ class GameBoardPainter extends CustomPainter {
   final CellPosition? tappedCellPosition;
 
   // Animation thresholds (fraction of total animation)
-  static const double _cellsStartThreshold = 0.0;
+  static const double _cellsStartThreshold = 0;
   static const double _cellsEndThreshold =
       0.5; // Cells appear during first 50% of animation
   static const double _backgroundStartThreshold =
@@ -342,16 +333,16 @@ class GameBoardPainter extends CustomPainter {
       0.75; // Kingdom borders appear at 75%
   static const double _contentsStartThreshold =
       0.85; // Contents (dots/queens) start at 85%
-  static const double _contentsEndThreshold = 1.0; // Contents complete at 100%
+  static const double _contentsEndThreshold = 1; // Contents complete at 100%
 
   // Animation constants
   static const double _fadeInDuration =
       0.15; // Cell takes 15% of total animation time to fade in
-  static const double _slideDistance = 30.0; // Distance in pixels to slide up
+  static const double _slideDistance = 30; // Distance in pixels to slide up
 
   // Constants for visual appearance
   static const Color outerBorderColor = Color(0xFF70392A);
-  static const double outerBorderWidth = 3.0;
+  static const double outerBorderWidth = 3;
   static const Color kingdomBorderColor = outerBorderColor;
   static const double kingdomBorderWidth = 1.5;
   static const double _epsilon = 0.001; // Small value for float comparisons
@@ -363,7 +354,7 @@ class GameBoardPainter extends CustomPainter {
     // Calculate board corner radius - proportional to cell size
     final boardCornerRadius = cellSize * 0.3; // 30% of cell size
     final radius = Radius.circular(
-        min(boardCornerRadius, 10.0)); // Cap at 10.0 for large boards
+        min(boardCornerRadius, 10)); // Cap at 10.0 for large boards
 
     // Save the canvas state before applying clipping
     canvas.save();
@@ -382,7 +373,7 @@ class GameBoardPainter extends CustomPainter {
     _drawBoardBackground(canvas);
 
     // Draw kingdom backgrounds first - behind the cells
-    double backgroundAlpha = 0.0;
+    double backgroundAlpha = 0;
     if (animationProgress >= _backgroundStartThreshold) {
       final backgroundProgress =
           (animationProgress - _backgroundStartThreshold) /
@@ -390,7 +381,7 @@ class GameBoardPainter extends CustomPainter {
       backgroundAlpha = backgroundProgress.clamp(0.0, 1.0);
 
       // Draw kingdom backgrounds with the calculated opacity
-      _drawKingdomBackgroundFills(canvas, cellSize, 1.0, backgroundAlpha);
+      _drawKingdomBackgroundFills(canvas, cellSize, 1, backgroundAlpha);
     }
 
     // Draw staggered cell animations ON TOP of the backgrounds
@@ -447,6 +438,59 @@ class GameBoardPainter extends CustomPainter {
     }
   }
 
+  /// Calculates the outer boundary points of a kingdom for drawing borders.
+  List<Offset> _getKingdomBoundaryPoints(Kingdom kingdom, double cellSize) {
+    final boundaryPoints = <Offset>{};
+    final cellsInKingdom = kingdom.cells.map((c) => (c.row, c.col)).toSet();
+    final boardSize = gameBoard.size;
+
+    // Iterate over all possible vertices in the grid
+    for (var r = 0; r <= boardSize; r++) {
+      for (var c = 0; c <= boardSize; c++) {
+        // The four cells meeting at vertex (r, c)
+        final topLeft = (r - 1, c - 1);
+        final topRight = (r - 1, c);
+        final bottomLeft = (r, c - 1);
+        final bottomRight = (r, c);
+
+        var kingdomCellsAtVertex = 0;
+        if (cellsInKingdom.contains(topLeft)) kingdomCellsAtVertex++;
+        if (cellsInKingdom.contains(topRight)) kingdomCellsAtVertex++;
+        if (cellsInKingdom.contains(bottomLeft)) kingdomCellsAtVertex++;
+        if (cellsInKingdom.contains(bottomRight)) kingdomCellsAtVertex++;
+
+        // A vertex is on the boundary if it's shared by 1, 2, or 3 cells
+        // of the same kingdom. 0 means it's outside, 4 means it's internal.
+        if (kingdomCellsAtVertex > 0 && kingdomCellsAtVertex < 4) {
+          boundaryPoints.add(Offset(c * cellSize, r * cellSize));
+        }
+      }
+    }
+
+    if (boundaryPoints.length < 3) return [];
+
+    final List<Offset> sortedPoints = boundaryPoints.toList();
+
+    // Calculate centroid to sort points radially
+    var centroidX = 0.0;
+    var centroidY = 0.0;
+    for (final point in sortedPoints) {
+      centroidX += point.dx;
+      centroidY += point.dy;
+    }
+    final centroid =
+        Offset(centroidX / sortedPoints.length, centroidY / sortedPoints.length);
+
+    // Sort points by angle around the centroid
+    sortedPoints.sort((a, b) {
+      final angleA = atan2(a.dy - centroid.dy, a.dx - centroid.dx);
+      final angleB = atan2(b.dy - centroid.dy, b.dx - centroid.dx);
+      return angleA.compareTo(angleB);
+    });
+
+    return sortedPoints;
+  }
+
   // --- Drawing Methods ---
 
   void _drawBoardBackground(Canvas canvas) {
@@ -461,15 +505,19 @@ class GameBoardPainter extends CustomPainter {
     );
   }
 
-  void _drawKingdomBackgroundFills(Canvas canvas, double cellSize,
-      [double animProgress = 1.0, double opacity = 1.0]) {
+  void _drawKingdomBackgroundFills(
+    Canvas canvas,
+    double cellSize,
+    double globalAlpha,
+    double backgroundAlpha,
+  ) {
     final fillPaint = Paint()..style = PaintingStyle.fill;
 
     for (final kingdom in gameBoard.kingdoms) {
       // Adjust opacity based on the fade-in parameter
-      fillPaint.color = kingdom.backgroundColor.withOpacity(opacity);
+      fillPaint.color = kingdom.backgroundColor.withOpacity(backgroundAlpha);
 
-      final Path path = Path();
+      final path = Path();
       for (final cell in kingdom.cells) {
         path.addRect(Rect.fromLTWH(
           cell.col * cellSize,
@@ -497,7 +545,7 @@ class GameBoardPainter extends CustomPainter {
     final visibleCellCount = (totalCells * animProgress).round();
 
     // Counter to track how many cells we've drawn
-    int cellsDrawn = 0;
+    var cellsDrawn = 0;
 
     for (final kingdom in gameBoard.kingdoms) {
       fillPaint.color = kingdom.color;
@@ -540,8 +588,8 @@ class GameBoardPainter extends CustomPainter {
     // Calculate the total number of cells with content
     final cellsWithContent = <(int, int)>[];
 
-    for (int r = 0; r < gameBoard.size; r++) {
-      for (int c = 0; c < gameBoard.size; c++) {
+    for (var r = 0; r < gameBoard.size; r++) {
+      for (var c = 0; c < gameBoard.size; c++) {
         final cell = gameBoard.getCell(r, c);
         if (cell != null && cell.state != CellState.empty) {
           cellsWithContent.add((r, c));
@@ -554,7 +602,7 @@ class GameBoardPainter extends CustomPainter {
         (cellsWithContent.length * animProgress).round();
 
     // Draw only the visible cell contents
-    for (int i = 0; i < cellsWithContent.length; i++) {
+    for (var i = 0; i < cellsWithContent.length; i++) {
       final r = cellsWithContent[i].$1;
       final c = cellsWithContent[i].$2;
       final cell = gameBoard.getCell(r, c);
@@ -625,7 +673,7 @@ class GameBoardPainter extends CustomPainter {
 
     for (final kingdom in gameBoard.kingdoms) {
       // Get all separate regions of this kingdom
-      final List<List<Offset>> regionVertices =
+      final regionVertices =
           _getKingdomRegionVertices(kingdom, cellSize);
 
       // Draw each region separately
@@ -633,11 +681,11 @@ class GameBoardPainter extends CustomPainter {
         if (vertices.length < 3) continue; // Need at least 3 points for corners
 
         // Create a new path with rounded corners
-        final Path roundedPath = Path();
-        final int n = vertices.length;
+        final roundedPath = Path();
+        final n = vertices.length;
 
         // Process each vertex
-        for (int i = 0; i < n; i++) {
+        for (var i = 0; i < n; i++) {
           final prevIndex = (i > 0) ? i - 1 : n - 1;
           final currIndex = i;
           final nextIndex = (i < n - 1) ? i + 1 : 0;
@@ -736,7 +784,7 @@ class GameBoardPainter extends CustomPainter {
     final cellSize = boardSize / gameBoard.size;
     final boardCornerRadius = cellSize * 0.3; // 30% of cell size
     final radius = Radius.circular(
-        min(boardCornerRadius, 10.0)); // Cap at 10.0 for large boards
+        min(boardCornerRadius, 10)); // Cap at 10.0 for large boards
 
     // Create a border that's positioned completely outside the cells
     final borderRect = RRect.fromRectAndRadius(
@@ -758,7 +806,7 @@ class GameBoardPainter extends CustomPainter {
     final regions = _identifyConnectedRegions(kingdom);
 
     // Then, get the outline vertices for each region
-    final List<List<Offset>> allRegionVertices = [];
+    final allRegionVertices = <List<Offset>>[];
 
     for (final region in regions) {
       // Create a sub-kingdom with just this region's cells
@@ -781,18 +829,18 @@ class GameBoardPainter extends CustomPainter {
 
   // Helper to identify separate, connected regions within a kingdom
   List<List<Cell>> _identifyConnectedRegions(Kingdom kingdom) {
-    final List<List<Cell>> regions = [];
-    final Set<Cell> unprocessedCells = Set.from(kingdom.cells);
+    final regions = <List<Cell>>[];
+    final unprocessedCells = Set<Cell>.from(kingdom.cells);
 
     while (unprocessedCells.isNotEmpty) {
       // Start a new region with the first unprocessed cell
-      final Cell startCell = unprocessedCells.first;
-      final List<Cell> currentRegion = [];
-      final Set<Cell> cellsToProcess = {startCell};
+      final startCell = unprocessedCells.first;
+      final currentRegion = <Cell>[];
+      final cellsToProcess = <Cell>{startCell};
 
       // Flood fill to find all cells connected to this region
       while (cellsToProcess.isNotEmpty) {
-        final Cell cell = cellsToProcess.first;
+        final cell = cellsToProcess.first;
         cellsToProcess.remove(cell);
 
         if (unprocessedCells.contains(cell)) {
@@ -836,18 +884,18 @@ class GameBoardPainter extends CustomPainter {
   // Helper to get ordered vertices of the kingdom outline
   List<Offset> _getOrderedKingdomVertices(Kingdom kingdom, double cellSize) {
     // 1. First get all border segments for this kingdom
-    final List<BorderSegment> segments =
+    final segments =
         _getKingdomBorderSegments(kingdom, cellSize);
     if (segments.isEmpty) return [];
 
     // 2. Connect segments to find vertices
-    final Set<int> usedSegmentIndices = {};
-    final List<Offset> orderedVertices = [];
+    final usedSegmentIndices = <int>{};
+    final orderedVertices = <Offset>[];
 
     while (usedSegmentIndices.length < segments.length) {
       // Find the first unused segment to start
-      int startIndex = -1;
-      for (int i = 0; i < segments.length; i++) {
+      var startIndex = -1;
+      for (var i = 0; i < segments.length; i++) {
         if (!usedSegmentIndices.contains(i)) {
           startIndex = i;
           break;
@@ -860,7 +908,7 @@ class GameBoardPainter extends CustomPainter {
       if (orderedVertices.isNotEmpty) {
         // Create a visual separation by adding duplicate points
         // This ensures we don't try to create curves between disjoint shapes
-        if (orderedVertices.length > 0) {
+        if (orderedVertices.isNotEmpty) {
           orderedVertices.add(Offset.zero); // Sentinel value
         }
       }
@@ -869,18 +917,18 @@ class GameBoardPainter extends CustomPainter {
       final startSegment = segments[startIndex];
       usedSegmentIndices.add(startIndex);
 
-      Offset currentPoint = startSegment.start;
+      var currentPoint = startSegment.start;
       orderedVertices.add(currentPoint); // First vertex
 
-      Offset nextPoint = startSegment.end;
+      var nextPoint = startSegment.end;
       orderedVertices.add(nextPoint); // Second vertex
 
       currentPoint = nextPoint;
-      Offset firstPoint = startSegment.start;
+      final firstPoint = startSegment.start;
 
       // Connect segments to traverse the outline
-      for (int i = 0; i < segments.length; i++) {
-        int? nextIndex = _findConnectedSegmentIndex(
+      for (var i = 0; i < segments.length; i++) {
+        final nextIndex = _findConnectedSegmentIndex(
             segments, usedSegmentIndices, currentPoint);
 
         if (nextIndex != null) {
@@ -941,58 +989,55 @@ class GameBoardPainter extends CustomPainter {
     final dot = abNorm.dx * bcNorm.dx + abNorm.dy * bcNorm.dy;
 
     // If dot product close to 1, it's a straight line
-    return (dot > 0.99);
+    return dot > 0.99;
   }
 
   // Helper to get all border segments for a kingdom
   List<BorderSegment> _getKingdomBorderSegments(
       Kingdom kingdom, double cellSize) {
-    final List<BorderSegment> segments = [];
-    final kingdomCellMap = <(int, int), bool>{};
-    for (final cell in kingdom.cells) {
-      kingdomCellMap[(cell.row, cell.col)] = true;
-    }
+    final borders = <BorderSegment>[];
+    final kingdomCellPositions =
+        kingdom.cells.map((c) => (c.row, c.col)).toSet();
 
     for (final cell in kingdom.cells) {
       final r = cell.row;
       final c = cell.col;
 
-      // Check Top Border
-      if (!kingdomCellMap.containsKey((r - 1, c))) {
-        segments.add((
-          start: Offset(c * cellSize, r * cellSize),
-          end: Offset((c + 1) * cellSize, r * cellSize)
-        ));
+      // Check top neighbor
+      if (!kingdomCellPositions.contains((r - 1, c))) {
+        final start = Offset(c * cellSize, r * cellSize);
+        final end = Offset((c + 1) * cellSize, r * cellSize);
+        borders.add((start: start, end: end));
       }
-      // Check Right Border
-      if (!kingdomCellMap.containsKey((r, c + 1))) {
-        segments.add((
-          start: Offset((c + 1) * cellSize, r * cellSize),
-          end: Offset((c + 1) * cellSize, (r + 1) * cellSize)
-        ));
+
+      // Check bottom neighbor
+      if (!kingdomCellPositions.contains((r + 1, c))) {
+        final start = Offset(c * cellSize, (r + 1) * cellSize);
+        final end = Offset((c + 1) * cellSize, (r + 1) * cellSize);
+        borders.add((start: start, end: end));
       }
-      // Check Bottom Border
-      if (!kingdomCellMap.containsKey((r + 1, c))) {
-        segments.add((
-          start: Offset(c * cellSize, (r + 1) * cellSize),
-          end: Offset((c + 1) * cellSize, (r + 1) * cellSize)
-        ));
+
+      // Check left neighbor
+      if (!kingdomCellPositions.contains((r, c - 1))) {
+        final start = Offset(c * cellSize, r * cellSize);
+        final end = Offset(c * cellSize, (r + 1) * cellSize);
+        borders.add((start: start, end: end));
       }
-      // Check Left Border
-      if (!kingdomCellMap.containsKey((r, c - 1))) {
-        segments.add((
-          start: Offset(c * cellSize, r * cellSize),
-          end: Offset(c * cellSize, (r + 1) * cellSize)
-        ));
+
+      // Check right neighbor
+      if (!kingdomCellPositions.contains((r, c + 1))) {
+        final start = Offset((c + 1) * cellSize, r * cellSize);
+        final end = Offset((c + 1) * cellSize, (r + 1) * cellSize);
+        borders.add((start: start, end: end));
       }
     }
-    return segments;
+    return borders;
   }
 
   // Helper to find the index of the next UNUSED segment connected to currentPoint
   int? _findConnectedSegmentIndex(
       List<BorderSegment> segments, Set<int> usedIndices, Offset currentPoint) {
-    for (int i = 0; i < segments.length; i++) {
+    for (var i = 0; i < segments.length; i++) {
       if (!usedIndices.contains(i)) {
         // Check if NOT already used
         final segment = segments[i];
@@ -1010,11 +1055,166 @@ class GameBoardPainter extends CustomPainter {
     return (p1.dx - p2.dx).abs() < _epsilon && (p1.dy - p2.dy).abs() < _epsilon;
   }
 
+  // --- Queen and Dot Drawing ---
+
+  /// Draws all the queens and dots on the board.
+  void _drawContents(Canvas canvas, double cellSize, double progress) {
+    if (progress <= 0) return;
+
+    final visibleCellCount = _countVisibleCells(animationProgress);
+    var drawnContentCount = 0;
+
+    for (final kingdom in gameBoard.kingdoms) {
+      for (final cell in kingdom.cells) {
+        if (cell.state != CellState.empty) {
+          // Calculate if this cell should be visible based on overall progress
+          final isVisible = _isCellContentVisible(
+            cell.row,
+            cell.col,
+            drawnContentCount,
+            visibleCellCount,
+          );
+
+          if (isVisible) {
+            switch (cell.state) {
+              case CellState.queen:
+                _drawQueen(canvas, cell, cellSize, progress);
+              case CellState.dot:
+                _drawDot(canvas, cell, cellSize, progress);
+              case CellState.empty:
+                break;
+            }
+          }
+          drawnContentCount++;
+        }
+      }
+    }
+  }
+
+  /// Calculates how many cell contents (dots/queens) should be visible
+  int _countVisibleCells(double animProgress) {
+    final contentProgress = (animProgress - _contentsStartThreshold) /
+        (_contentsEndThreshold - _contentsStartThreshold);
+    final clampedProgress = contentProgress.clamp(0.0, 1.0);
+
+    final totalContentCells =
+        gameBoard.kingdoms.fold<int>(0, (prev, k) {
+      return prev +
+          k.cells.where((c) => c.state != CellState.empty).length;
+    });
+
+    return (totalContentCells * clampedProgress).floor();
+  }
+
+  /// Determines if a specific cell's content should be drawn yet.
+  bool _isCellContentVisible(
+    int row,
+    int col,
+    int drawnCount,
+    int visibleCount,
+  ) {
+    return drawnCount < visibleCount;
+  }
+
+  /// Draws a single queen in a cell.
+  void _drawQueen(
+    Canvas canvas,
+    Cell cell,
+    double cellSize,
+    double progress,
+  ) {
+    final center = Offset(
+      cell.col * cellSize + cellSize / 2,
+      cell.row * cellSize + cellSize / 2,
+    );
+
+    // Use QueenIcon to draw the queen
+    final iconPainter = QueenIcon(
+      size: cellSize * 0.7, // 70% of cell size
+      color: outerBorderColor.withOpacity(progress),
+    ).painter();
+
+    iconPainter.paint(
+      canvas,
+      Size(cellSize, cellSize),
+    );
+  }
+
+  /// Draws a single dot in a cell.
+  void _drawDot(Canvas canvas, Cell cell, double cellSize, double progress) {
+    final center = Offset(
+      cell.col * cellSize + cellSize / 2,
+      cell.row * cellSize + cellSize / 2,
+    );
+
+    final paint = Paint()
+      ..color = outerBorderColor.withOpacity(progress)
+      ..style = PaintingStyle.fill;
+
+    // Draw a circle for the dot
+    canvas.drawCircle(center, cellSize * 0.2, paint); // 20% of cell size
+  }
+
+  // --- Hit-testing and Highlighting ---
+  void _drawTapHighlight(Canvas canvas, double cellSize) {
+    if (tappedCellPosition != null) {
+      final pos = tappedCellPosition!;
+      final paint = Paint()
+        ..color = Colors.black.withOpacity(0.1)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawRect(
+        Rect.fromLTWH(
+          pos.col * cellSize,
+          pos.row * cellSize,
+          cellSize,
+          cellSize,
+        ),
+        paint,
+      );
+    }
+  }
+
   @override
   bool shouldRepaint(covariant GameBoardPainter oldDelegate) {
-    return oldDelegate.gameBoard != gameBoard ||
-        oldDelegate.boardSize != boardSize ||
-        oldDelegate.animationProgress != animationProgress ||
+    // Repaint if the animation is running or if the tapped cell changes
+    return oldDelegate.animationProgress != animationProgress ||
         oldDelegate.tappedCellPosition != tappedCellPosition;
+  }
+}
+
+class QueenIcon {
+  QueenIcon({required this.size, required this.color});
+  final double size;
+  final Color color;
+
+  CustomPainter painter() {
+    return _QueenIconPainter(size: size, color: color);
+  }
+}
+
+class _QueenIconPainter extends CustomPainter {
+  _QueenIconPainter({required this.size, required this.color});
+  final double size;
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width * 0.5, size.height * 0.1);
+    path.lineTo(size.width * 0.7, size.height * 0.4);
+    path.lineTo(size.width * 0.3, size.height * 0.4);
+    path.close();
+    canvas.drawPath(path, paint);
+
+    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.6), size.width * 0.2, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }

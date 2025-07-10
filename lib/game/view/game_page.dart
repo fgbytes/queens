@@ -78,7 +78,7 @@ class _GamePageState extends State<GamePage> {
             // Size Controls (unchanged)
             Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -112,21 +112,20 @@ class _GamePageState extends State<GamePage> {
             Expanded(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(
                       maxWidth: 600,
                       maxHeight: 600,
                     ),
                     child: AspectRatio(
-                      aspectRatio: 1.0,
+                      aspectRatio: 1,
                       child: GameBoardWidget(
                         // Use ValueKey to force state rebuild on change
                         key: ValueKey(_animationRun),
                         gameBoard: _gameBoard,
                         // Always pass animate: true
                         animate: true,
-                        enableHaptics: true,
                       ),
                     ),
                   ),
@@ -136,7 +135,7 @@ class _GamePageState extends State<GamePage> {
 
             // Controls Area
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

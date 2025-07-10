@@ -3,10 +3,7 @@ import 'package:queens/game/models/game_board_model.dart';
 
 class GameCell extends StatelessWidget {
   const GameCell({
-    super.key,
-    required this.cell,
-    required this.size,
-    required this.onTap,
+    required this.cell, required this.size, required this.onTap, super.key,
     this.backgroundColor,
     this.borderColor = Colors.grey,
     this.borderWidth = 0.5,
@@ -126,7 +123,7 @@ class GameCell extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black87,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1),
+            border: Border.all(color: Colors.white),
           ),
         );
       case CellState.queen:

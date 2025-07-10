@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:queens/achievements/view/achievements_page.dart';
 // Import the new route definitions
 import 'package:queens/app/router/app_routes.dart';
-
-// Import the new pages
-import 'package:queens/home/view/home_page.dart';
-import 'package:queens/achievements/view/achievements_page.dart';
-import 'package:queens/levels/view/levels_page.dart';
-import 'package:queens/game/view/game_page.dart';
-import 'package:queens/settings/view/settings_page.dart';
-
 // Import existing pages (keeping debug routes for now)
 import 'package:queens/counter/counter.dart';
 import 'package:queens/debug_playground/view/debug_playground_page.dart';
 import 'package:queens/debug_playground/view/main_page_prototype.dart';
+import 'package:queens/game/view/game_page.dart';
+// Import the new pages
+import 'package:queens/home/view/home_page.dart';
+import 'package:queens/levels/view/levels_page.dart';
+import 'package:queens/settings/view/settings_page.dart';
 
 // Define the route paths - REMOVED as it's now in app_routes.dart
 // class AppRoutes { ... }

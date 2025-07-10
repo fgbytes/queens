@@ -7,12 +7,12 @@ TextTheme createTextTheme(
   String bodyFontString,
   String displayFontString,
 ) {
-  TextTheme baseTextTheme = Theme.of(context).textTheme;
-  TextTheme bodyTextTheme =
+  final baseTextTheme = Theme.of(context).textTheme;
+  final bodyTextTheme =
       GoogleFonts.getTextTheme(bodyFontString, baseTextTheme);
-  TextTheme displayTextTheme =
+  final displayTextTheme =
       GoogleFonts.getTextTheme(displayFontString, baseTextTheme);
-  TextTheme textTheme = displayTextTheme.copyWith(
+  final textTheme = displayTextTheme.copyWith(
     bodyLarge: bodyTextTheme.bodyLarge,
     bodyMedium: bodyTextTheme.bodyMedium,
     bodySmall: bodyTextTheme.bodySmall,
@@ -31,7 +31,7 @@ class MaterialTheme {
   // It still needs *a* context, typically from where it's called.
   static TextTheme _textTheme(BuildContext context) {
     // Using the fonts from the temp example
-    return createTextTheme(context, "Open Sans", "Adamina");
+    return createTextTheme(context, 'Open Sans', 'Adamina');
   }
 
   // Make theme methods accept BuildContext

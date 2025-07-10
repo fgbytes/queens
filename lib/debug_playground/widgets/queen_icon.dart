@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class QueenIcon extends StatelessWidget {
   const QueenIcon({
-    super.key,
-    required this.size,
+    required this.size, super.key,
     this.color = Colors.black87,
   });
 
@@ -45,11 +44,11 @@ class QueenIconPainter extends CustomPainter {
     // Reference image shows a chess-like crown with 5 points/spikes
 
     // Base points for the crown
-    final double baseY = size.height * 0.75;
-    final double maxHeight = size.height * 0.20; // Height of tallest spike
+    final baseY = size.height * 0.75;
+    final maxHeight = size.height * 0.20; // Height of tallest spike
 
     // Create 5 spikes at the top of the crown
-    final List<Offset> basePoints = [
+    final basePoints = <Offset>[
       Offset(size.width * 0.15, baseY), // Left edge
       Offset(size.width * 0.30, baseY),
       Offset(size.width * 0.50, baseY), // Center
@@ -57,7 +56,7 @@ class QueenIconPainter extends CustomPainter {
       Offset(size.width * 0.85, baseY), // Right edge
     ];
 
-    final List<Offset> tipPoints = [
+    final tipPoints = <Offset>[
       Offset(size.width * 0.15, baseY - maxHeight * 0.9), // Left spike
       Offset(size.width * 0.30, baseY - maxHeight * 0.75),
       Offset(size.width * 0.50, baseY - maxHeight), // Center spike (tallest)
@@ -66,7 +65,7 @@ class QueenIconPainter extends CustomPainter {
     ];
 
     // Draw the crown base
-    final Path basePath = Path()
+    final basePath = Path()
       ..moveTo(size.width * 0.10, baseY)
       ..lineTo(size.width * 0.90, baseY)
       ..lineTo(size.width * 0.80, baseY + size.height * 0.15)
@@ -76,7 +75,7 @@ class QueenIconPainter extends CustomPainter {
     canvas.drawPath(basePath, paint);
 
     // Draw the spikes
-    for (int i = 0; i < basePoints.length; i++) {
+    for (var i = 0; i < basePoints.length; i++) {
       // Draw line from base to tip
       canvas.drawLine(basePoints[i], tipPoints[i], strokePaint);
 

@@ -20,7 +20,7 @@ class MainPagePrototype extends StatelessWidget {
             shaderCallback: (Rect bounds) {
               // Gradient that is transparent at the top, opaque below
               // Adjust stops to control the fade height (e.g., 0.05 means top 5%)
-              return LinearGradient(
+              return const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
@@ -28,12 +28,11 @@ class MainPagePrototype extends StatelessWidget {
                   Colors.black, // Fade to opaque
                   Colors.black, // Stay opaque
                 ],
-                stops: const [
+                stops: [
                   0.0,
                   0.05,
                   1.0,
                 ], // Adjust 0.05 to control fade distance
-                tileMode: TileMode.clamp,
               ).createShader(
                 // Create shader bounds slightly offset to avoid fading the very top pixel if not desired
                 // Rect.fromLTRB(bounds.left, bounds.top + 1, bounds.right, bounds.bottom),
@@ -58,7 +57,7 @@ class MainPagePrototype extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       '14,525 joined',
                       style: textTheme.titleMedium?.copyWith(
@@ -72,7 +71,7 @@ class MainPagePrototype extends StatelessWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
+                          horizontal: 16, vertical: 8),
                       children: [
                         _buildCountryItem(context, 'Egypt', '25 lvls'),
                         _buildCountryItem(context, 'Russia', '35 lvls'),
@@ -92,7 +91,7 @@ class MainPagePrototype extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       '14,525 joined',
                       style: textTheme.titleMedium?.copyWith(
@@ -102,7 +101,7 @@ class MainPagePrototype extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         _buildDifficultyCard(
@@ -146,9 +145,9 @@ class MainPagePrototype extends StatelessWidget {
     return Container(
       color: theme.colorScheme.surface, // Or surfaceContainerHighest
       padding: const EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        bottom: 12.0,
+        left: 16,
+        right: 16,
+        bottom: 12,
       ),
       height: 100, // Example fixed height for the header area
       // Use a Stack for independent positioning
@@ -188,22 +187,18 @@ class MainPagePrototype extends StatelessWidget {
     switch (name) {
       case 'Egypt':
         countryIcon = Icons.temple_hindu;
-        break;
       case 'Russia':
         countryIcon = Icons.church;
-        break;
       case 'UK':
         countryIcon = Icons.castle;
-        break;
       case 'France':
         countryIcon = Icons.tour;
-        break;
       default:
         countryIcon = Icons.location_city;
     }
 
     return Padding(
-      padding: const EdgeInsets.only(right: 24.0),
+      padding: const EdgeInsets.only(right: 24),
       child: Column(
         children: [
           // Circular avatar for country illustration
@@ -245,20 +240,17 @@ class MainPagePrototype extends StatelessWidget {
     switch (difficulty) {
       case 'Easy':
         difficultyIcon = Icons.emoji_emotions; // Happy face
-        break;
       case 'Medium':
         difficultyIcon = Icons.sentiment_neutral; // Neutral face
-        break;
       case 'Hard':
         difficultyIcon = Icons.sentiment_very_dissatisfied; // Sad face
-        break;
       default:
         difficultyIcon = Icons.person;
     }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16),

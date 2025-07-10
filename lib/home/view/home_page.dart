@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for SystemUiOverlayStyle
 import 'package:go_router/go_router.dart';
 import 'package:queens/app/router/app_routes.dart';
-import 'package:flutter/services.dart'; // Import for SystemUiOverlayStyle
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
           bottom: false,
           child: ShaderMask(
             shaderCallback: (Rect bounds) {
-              return LinearGradient(
+              return const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
@@ -28,8 +28,7 @@ class HomePage extends StatelessWidget {
                   Colors.black,
                   Colors.black,
                 ],
-                stops: const [0.0, 0.05, 1.0],
-                tileMode: TileMode.clamp,
+                stops: [0.0, 0.05, 1.0],
               ).createShader(bounds);
             },
             blendMode: BlendMode.dstIn,
@@ -52,7 +51,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       '14,525 joined',
                       style: textTheme.titleMedium?.copyWith(
@@ -66,7 +65,7 @@ class HomePage extends StatelessWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
+                          horizontal: 16, vertical: 8),
                       children: [
                         _buildCountryItem(context, 'Egypt', '25 lvls'),
                         _buildCountryItem(context, 'Russia', '35 lvls'),
@@ -88,7 +87,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       '14,525 joined',
                       style: textTheme.titleMedium?.copyWith(
@@ -98,7 +97,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         _buildDifficultyCard(
@@ -146,9 +145,9 @@ class HomePage extends StatelessWidget {
     return Container(
       color: theme.colorScheme.surface,
       padding: const EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        bottom: 12.0,
+        left: 16,
+        right: 16,
+        bottom: 12,
       ),
       height: 100,
       child: Stack(
@@ -181,22 +180,18 @@ class HomePage extends StatelessWidget {
     switch (name) {
       case 'Egypt':
         countryIcon = Icons.temple_hindu;
-        break;
       case 'Russia':
         countryIcon = Icons.church;
-        break;
       case 'UK':
         countryIcon = Icons.castle;
-        break;
       case 'France':
         countryIcon = Icons.tour;
-        break;
       default:
         countryIcon = Icons.location_city;
     }
 
     return Padding(
-      padding: const EdgeInsets.only(right: 24.0),
+      padding: const EdgeInsets.only(right: 24),
       child: Column(
         children: [
           CircleAvatar(
@@ -235,13 +230,10 @@ class HomePage extends StatelessWidget {
     switch (difficulty) {
       case 'Easy':
         difficultyIcon = Icons.emoji_emotions;
-        break;
       case 'Medium':
         difficultyIcon = Icons.sentiment_neutral;
-        break;
       case 'Hard':
         difficultyIcon = Icons.sentiment_very_dissatisfied;
-        break;
       default:
         difficultyIcon = Icons.star_border;
     }
@@ -256,7 +248,7 @@ class HomePage extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),

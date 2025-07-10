@@ -55,6 +55,23 @@ $ open coverage/index.html
 
 ---
 
+## Building for Release 📦
+
+To build a release version of the app, use the following commands to generate an app bundle:
+
+```sh
+# Development
+$ flutter build appbundle --flavor development --target lib/main_development.dart
+
+# Staging
+$ flutter build appbundle --flavor staging --target lib/main_staging.dart
+
+# Production
+$ flutter build appbundle --flavor production --target lib/main_production.dart
+```
+
+---
+
 ## Working with Translations 🌐
 
 This project relies on [flutter_localizations][flutter_localizations_link] and follows the [official internationalization guide for Flutter][internationalization_link].
